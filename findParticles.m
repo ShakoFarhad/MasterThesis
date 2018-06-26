@@ -1,4 +1,4 @@
-function coordinates=findParticles(image,threshold,particleLength,filter, noiseLength, visualize)
+function [varargout]=findParticles(image,threshold,particleLength,filter,noiseLength,visualize)
 %Finds local maxima in an image to pixel level accuracy.
 %
 %coordinates=findParticles(image,threshold,particleLength,filter,noiseLength)
@@ -9,6 +9,7 @@ function coordinates=findParticles(image,threshold,particleLength,filter, noiseL
 %filter - Three options. 'bandpass', 'lowpass' and 'no' for no filter.
 %noiseLength - The diameter of noise particles in pixels.
 %visualize - 'plot' plots dots on the original image.
+
     %Minimum 1 inputs and maximum 6 inputs
     narginchk(1,6)
     
@@ -19,7 +20,7 @@ function coordinates=findParticles(image,threshold,particleLength,filter, noiseL
         particleLength = 5.0;
     end
     if ~exist('filter', 'var')
-        filter = 'bandpass';
+        filter = 'Aggressive';
     end
     if ~exist('noiseLength', 'var')
         noiseLength = 1.0;
@@ -27,34 +28,43 @@ function coordinates=findParticles(image,threshold,particleLength,filter, noiseL
     if ~exist('visualize', 'var')
         visualize = ' ';
     end
-    if(strcmp(filter,'bandpass'))
-        %Gaussian filter
-        G = gauss(10*noiseLength+1,10*noiseLength+1,noiseLength);
 
-        %Box blur filter
-        B = ones(round(particleLength), round(particleLength));
+    if(strcmpi(filter,'Aggressive'))
+        %Gaussian filter - Lowpass
+        meshSize = particleLength;
+        G = gauss(meshSize,meshSize,noiseLength);
+
+        %Box blur filter - Lowpass
+        meshSize = (round(particleLength/2)-1)-(round(-particleLength/2)+1) + 1;
+        B = ones(round(meshSize), round(meshSize));
         B = B./sum(B(:));
-
         gConv = conv2(image,G,'same');
         bConv = conv2(image,B,'same');
 
+        %Aggressive filter
         filtered = gConv - bConv;
-
-        filtered(1:(round(particleLength)),:) = 0;
-        filtered((end - particleLength + 1):end,:) = 0;
-        filtered(:,1:(round(particleLength))) = 0;
-        filtered(:,(end - particleLength + 1):end) = 0;
+        filtered(1:(round(particleLength/2)),:) = 0;
+        filtered((end - round(particleLength/2) + 1):end,:) = 0;
+        filtered(:,1:(round(particleLength/2))) = 0;
+        filtered(:,(end - round(particleLength/2) + 1):end) = 0;
         filtered(filtered < 0) = 0;
 
-    elseif(strcmp(filter, 'lowpass'))
-        %Gaussian filter
-        G = gauss(10*noiseLength+1,10*noiseLength+1,noiseLength);
+        if(max(max(filtered)) == 0)
+            filtered = image;
+        end
+
+    elseif(strcmpi(filter, 'Gaussian'))
+        %Gaussian filter - Lowpass
+        meshSize = particleLength;
+        G = gauss(meshSize,meshSize,noiseLength);
         filtered = conv2(image,G,'same');
-        filtered(1:(round(particleLength)),:) = 0;
-        filtered((end - particleLength + 1):end,:) = 0;
-        filtered(:,1:(round(particleLength))) = 0;
-        filtered(:,(end - particleLength + 1):end) = 0;
-        filtered(filtered < 0) = 0;
+
+    elseif(strcmpi(filter, 'Box'))
+        %Box blur filter - Lowpass
+        meshSize = (round(particleLength/2)-1)-(round(-particleLength/2)+1) + 1;
+        B = ones(round(meshSize), round(meshSize));
+        B = B./sum(B(:));
+        filtered = conv2(image,B,'same');
     else
         filtered = image;
     end
@@ -65,7 +75,12 @@ function coordinates=findParticles(image,threshold,particleLength,filter, noiseL
     n=length(row);
     if n==0
         coordinates=[];
-        disp('nothing above threshold');
+        if nargout == 1
+            varargout{1} = coordinates;
+        elseif nargout == 2
+            varargout{1} = coordinates;
+            varargout{2} = filtered;
+        end
         return;
     end
 
@@ -105,7 +120,7 @@ function coordinates=findParticles(image,threshold,particleLength,filter, noiseL
         for j=i+1:n
             %Checking if two bright points overlap.
             if(((brightPoints(i,1)-brightPoints(j,1))^2 + ...
-                    (brightPoints(i,2)-brightPoints(j,2))^2) < (2*particleLength)^2)
+                    (brightPoints(i,2)-brightPoints(j,2))^2) < (particleLength)^2)
                 %Saving the overlapping points and accompanying indexes.
                 overlappingPoints(1,1) = brightPoints(i,1);
                 overlappingPoints(1,2) = brightPoints(i,2);
@@ -120,36 +135,34 @@ function coordinates=findParticles(image,threshold,particleLength,filter, noiseL
         overlappingPoints(all(~overlappingPoints,2), : ) = [];
         overlappingPointsIndexes(all(~overlappingPointsIndexes,2), : ) = [];
         l = 2;
-        if(size(overlappingPoints,1) ~= 0)
-            if(size(overlappingPoints,1) > 1)
-                %Comparing overlapping points and keeping only the brightest
-                %point.
-                brightestPointIndex = 1;
-                for k=1:size(overlappingPoints,1)-1
-                    if(image(overlappingPoints(brightestPointIndex,1), ...
-                            overlappingPoints(brightestPointIndex,2)) > ...
-                            image(overlappingPoints(k+1,1),overlappingPoints(k+1,2)))
-                    else
-                        brightestPointIndex = k + 1;
-                    end
+        if(size(overlappingPoints,1) > 1)
+            %Comparing overlapping points and keeping only the brightest
+            %point.
+            brightestPointIndex = 1;
+            for k=1:size(overlappingPoints,1)-1
+                if(filtered(overlappingPoints(brightestPointIndex,2), ...
+                        overlappingPoints(brightestPointIndex,1)) > ...
+                        filtered(overlappingPoints(k+1,2),overlappingPoints(k+1,1)))
+                else
+                    brightestPointIndex = k + 1;
                 end
-                %Making sure everything apart from the brightest point gets
-                %removed.
-                m = 1;
-                for k=1:size(overlappingPoints,1)
-                    if(k ~= brightestPointIndex)
-                        pointsToRemove(m) = k;
-                        m = m + 1;
-                    end
+            end
+            %Making sure everything apart from the brightest point gets
+            %removed.
+            m = 1;
+            for k=1:size(overlappingPoints,1)
+                if(k ~= brightestPointIndex)
+                    pointsToRemove(m) = k;
+                    m = m + 1;
                 end
-                %Removing excess zeros.
-                pointsToRemove(all(~pointsToRemove,2), : ) = [];
+            end
+            %Removing excess zeros.
+            pointsToRemove(all(~pointsToRemove,2), : ) = [];
 
-                %Setting the less bright points to zero.
-                for k=1:size(pointsToRemove,1)
-                    brightPoints(overlappingPointsIndexes(pointsToRemove(k)),1) = 0;
-                    brightPoints(overlappingPointsIndexes(pointsToRemove(k)),2) = 0;
-                end
+            %Setting the less bright points to zero.
+            for k=1:size(pointsToRemove,1)
+                brightPoints(overlappingPointsIndexes(pointsToRemove(k)),1) = 0;
+                brightPoints(overlappingPointsIndexes(pointsToRemove(k)),2) = 0;
             end
         end
         %Resetting vectors.
@@ -161,7 +174,7 @@ function coordinates=findParticles(image,threshold,particleLength,filter, noiseL
     brightPoints( ~any(brightPoints,2), : ) = [];
 
     %Plotting the coordinates onto the original given image.
-    if(strcmp(visualize,'plot'))
+    if(strcmpi(visualize,'plot'))
         figure
         imagesc(image)
         hold on
@@ -170,6 +183,12 @@ function coordinates=findParticles(image,threshold,particleLength,filter, noiseL
         end
         hold off
     end
-
     coordinates = brightPoints;
+    %return
+    if nargout == 1
+        varargout{1} = coordinates;
+    elseif nargout == 2
+        varargout{1} = coordinates;
+        varargout{2} = filtered;
+    end
 end
