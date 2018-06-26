@@ -223,7 +223,7 @@ function runMainPTVProgramBlock(data1,data2, images)
         prompt = {'Use Masks; Yes, No:', 'Particle Brightness Threshold:', 'Particle Diameter in Pixels:', 'Image Filtering; Aggressive, Gaussian, Box:', 'Image Noise Length:', 'PIV Overlap', 'PIV Sub Window: Rectangle of length x and height y; [x,y]', 'PIV Search Area: Rectangle of length x and height y; [x,y]', 'Tracking Search Radius:', 'Number of Frames Particles may Disappear:', 'Replace Outliers; with mask, without mask, no:', 'Ensemble PIV % Contribution: 1 = 100%; Only Ensemble. 0 = 0%; Only Image to Image PIV', 'Simplify Images % Contribution: 1 = 100%; Only Particles Found. 0 = 0%; Using Images As Is.', 'Previous Velocity Field % Contribution: 1 = 100%; Current Velocity Field Is Ignored. 0 = 0%; Only Using Current Velocity Field.', 'Amount of Distorted Passes: Makes the Velocity Field more Accurate; 0,1,2,3', 'Subpixel Accuracy: 3x2, 3x3, 3x3lm, 3x3ls, 5x5lm, 5x5ls or none', 'Plot PIV Signal to Noise Ratio.', 'Remove trajectories smaller than X points:', 'Remove trajectories outside of mask:', 'Plot the Trajectories:'};
         dlg_title = 'PTV inputs';
         num_lines = 1;
-        defaultans = {'Yes', num2str(threshold), num2str(particleLength), filter, num2str(noiseLength), '0.5', '[30, 30]', '[10, 10]', '2.0', '0', 'Without mask', '0.75', '0.75', '0.5', '3', '3x3', 'Yes', '3', 'Yes', 'Yes'};
+        defaultans = {'Yes', num2str(threshold), num2str(particleLength), filter, num2str(noiseLength), '0.5', '[30, 30]', '[10, 10]', '2.0', '0', 'Without mask', '0.75', '0.75', '0.5', '3', '3x3ls', 'Yes', '3', 'Yes', 'Yes'};
         answer = inputdlg(prompt,dlg_title,num_lines,defaultans);
     end
     if(isempty(answer))
