@@ -114,22 +114,39 @@ while(retry == 1)
     end
     complementNormalized = imcomplement(normalized);
     
+    aspectRatio = size(normalized,1)/size(normalized,2)
     f = figure();
-    subplot(1,2,1);
-    imagesc(imageAddPostProssessed)
-    title('Added Image Intensities','FontSize',fontSize)
-    xlabel('Pixels','FontSize',fontSize) % x-axis label
-    ylabel('Pixels','FontSize',fontSize) % y-axis label
-    set(gca, 'FontSize', fontSize);
-    subplot(1,2,2);
-    imagesc(complementNormalized)
-    colormap('gray')
-    title('Added Image Intensities Vein Mask','FontSize',fontSize)
-    xlabel('Pixels','FontSize',fontSize) % x-axis label
-    ylabel('Pixels','FontSize',fontSize) % y-axis label
-    set(gca, 'FontSize', fontSize);
-    aspectRatio = min(size(normalized,2))/min(size(normalized,1));
-    set(f, 'Position', [-100, 150, max(min(size(normalized,2)*3.5,700*2.5*aspectRatio),600), max(min(size(normalized,1),700),350)])
+    if(aspectRatio>=0.75)
+        subplot(1,2,1);
+        imagesc(imageAddPostProssessed)
+        title('Added Image Intensities','FontSize',fontSize)
+        xlabel('Pixels','FontSize',fontSize) % x-axis label
+        ylabel('Pixels','FontSize',fontSize) % y-axis label
+        set(gca, 'FontSize', fontSize);
+        subplot(1,2,2);
+        imagesc(complementNormalized)
+        colormap('gray')
+        title('Added Image Intensities Vein Mask','FontSize',fontSize)
+        xlabel('Pixels','FontSize',fontSize) % x-axis label
+        ylabel('Pixels','FontSize',fontSize) % y-axis label
+        set(gca, 'FontSize', fontSize);
+        set(f, 'Position', [100, 150, max(min(size(normalized,2)*3.5,2000),1600), max(min(size(normalized,1),800),400)])
+    else
+        subplot(2,1,1);
+        imagesc(imageAddPostProssessed)
+        title('Added Image Intensities','FontSize',fontSize)
+        xlabel('Pixels','FontSize',fontSize) % x-axis label
+        ylabel('Pixels','FontSize',fontSize) % y-axis label
+        set(gca, 'FontSize', fontSize);
+        subplot(2,1,2);
+        imagesc(complementNormalized)
+        colormap('gray')
+        title('Added Image Intensities Vein Mask','FontSize',fontSize)
+        xlabel('Pixels','FontSize',fontSize) % x-axis label
+        ylabel('Pixels','FontSize',fontSize) % y-axis label
+        set(gca, 'FontSize', fontSize);
+        set(f, 'Position', [100, 100, max(min(size(normalized,2),1100),900), max(min(size(normalized,1)*3.5,900),700)])
+    end
     
     maxValue = max(max(imageAddPostProssessed));
     minValue = min(min(imageAddPostProssessed));
