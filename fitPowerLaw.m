@@ -7,9 +7,17 @@ function []=fitPowerLaw(firstFoundTrackingPoints, distanceImage, dataType, binWi
     % histBinEnd: Histogram Bin End
     % histBinWidth: Histogram Bin Width
     narginchk(2,5)
-
-    particleDistances = [diag(distanceImage(firstFoundTrackingPoints(:,2), firstFoundTrackingPoints(:,1))), firstFoundTrackingPoints(:,4)];
-
+    
+    try
+        particleDistances = [diag(distanceImage(firstFoundTrackingPoints(:,2), firstFoundTrackingPoints(:,1))), firstFoundTrackingPoints(:,4)];
+    catch
+        %If out of memory, use for loops to fill particleDistances
+        particleDistances = zeros(size(firstFoundTrackingPoints,1),2);
+        for i=1:size(firstFoundTrackingPoints,1)
+            particleDistances(i, :) = [distanceImage(firstFoundTrackingPoints(i,2), firstFoundTrackingPoints(i,1)), firstFoundTrackingPoints(i,4)];
+        end
+    end
+    
     IDsortedTracks = sortrows(particleDistances,2);
     findDifferenceIndex = find(diff(IDsortedTracks(:,2)) ~= 0);
     trajectoryLengthsInArray = diff(findDifferenceIndex);
