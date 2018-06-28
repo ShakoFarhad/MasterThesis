@@ -391,6 +391,7 @@ function runMainPTVProgramBlock(data1,data2, images)
         imagesc(piv.snr);
         titleText = 'PIV Signal to Noise Ratio.';
         title(titleText,'FontSize',fontSize)
+        set(gca, 'FontSize', fontSize)
     end
     
     %Removing short tracks.

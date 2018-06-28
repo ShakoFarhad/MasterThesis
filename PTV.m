@@ -342,8 +342,8 @@ function [varargout]=PTV(images, masks, threshold, particleLength, filter, noise
 
         %Simplifying the images for the PIV by drawing circles where particles have been found.    
         if(simplifyContribution == 1)
-            im1 = im2double(drawCircles(im1, coord1(:,1:2), particleLength, blur, sigma));
-            im2 = im2double(drawCircles(im2, coord2(:,1:2), particleLength, blur, sigma));
+            im1 = drawCircles(im1, coord1(:,1:2), particleLength, blur, sigma);
+            im2 = drawCircles(im2, coord2(:,1:2), particleLength, blur, sigma);
             if(distortedPass>0)
                 multipass = [];
                 piv = PIV(im1, im2, mask1, mask2, overlap, subWindow, searchArea, 0, 0, multipass,subpixel, particleLength);
@@ -378,8 +378,8 @@ function [varargout]=PTV(images, masks, threshold, particleLength, filter, noise
                 [piv, U, V] = PIV(im1, im2, mask1, mask2, overlap, subWindow, searchArea, replaceOutliers, distortedPass, multipass,subpixel, particleLength);
             end
         else
-            drawIm1 = im2double(drawCircles(im1, coord1(:,1:2), particleLength, blur, sigma));
-            drawIm2 = im2double(drawCircles(im2, coord2(:,1:2), particleLength, blur, sigma));
+            drawIm1 = drawCircles(im1, coord1(:,1:2), particleLength, blur, sigma);
+            drawIm2 = drawCircles(im2, coord2(:,1:2), particleLength, blur, sigma);
             im1 = im1*(1-simplifyContribution) + drawIm1/max(max(drawIm1))*max(max(im1))*simplifyContribution;
             im2 = im2*(1-simplifyContribution) + drawIm2/max(max(drawIm2))*max(max(im2))*simplifyContribution;
             if(distortedPass>0)

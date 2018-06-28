@@ -77,7 +77,7 @@ while(retry == 1)
         alphaLower = 1.3;
         startValues = 0;
     else
-        prompt = {'Blur Strength:','Black and White Threshold:', 'Percentage upper mask cutoff', 'Percentage lower mask cutoff'};
+        prompt = {'Blur Strength:','Black and White Threshold: Lower value makes the mask bigger.', 'Upper half of mask cutoff: Lower value cuts off more.', 'Lower half of mask cutoff: Lower value cuts off more.'};
         dlg_title = 'Create Mask From Images';
         num_lines = 1;
         defaultans = {num2str(sigma),num2str(threshold), num2str(alphaUpper),num2str(alphaLower)};
@@ -114,7 +114,7 @@ while(retry == 1)
     end
     complementNormalized = imcomplement(normalized);
     
-    aspectRatio = size(normalized,1)/size(normalized,2)
+    aspectRatio = size(normalized,1)/size(normalized,2);
     f = figure();
     if(aspectRatio>=0.75)
         subplot(1,2,1);

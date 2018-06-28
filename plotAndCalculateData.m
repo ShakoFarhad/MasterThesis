@@ -92,11 +92,23 @@ if(fullData ~= 0)
 
     [thetaFull, signChangeCountFull, trajectoryEndPointsFull, totalAmountOfTrajectoriesFull] = CalculateParticleAngle(sortedFFTPFull, maskFull, framesMovement, useMaskLine);
     
-    angleFull = angleFull
+    angleFull
+    framesMovement
     signChangeCountFull
     percentageOfTrajectoriesThetaFull = size(thetaFull,1)/totalAmountOfTrajectoriesFull*100
     percentageOfTrajectoriesAngleFull = sum(thetaFull>=angleFull)/totalAmountOfTrajectoriesFull*100
     thetaFullMinMax = [min(thetaFull), max(thetaFull)]
+    
+    figure
+    contourf(magnitudeVelocityFull)    
+    set(gca, 'YDir', 'reverse');
+    set(gca, 'FontSize', fontSize);
+    titleText = 'Magnitude of Velocity Field';
+    title(titleText,'FontSize',fontSize)
+    c = colorbar('southoutside','FontSize',fontSize);
+    c.Label.String = 'Velocity in Pixels per Frame';
+    xlabel('Pixels','FontSize',fontSize) % x-axis label
+    ylabel('Pixels','FontSize',fontSize) % y-axis label
 
     particleAverageVelocityQuiverPlot(sortedFFTPFull, magnitudeVelocityFull)
     particleAverageVelocityQuiverPlot(firstFoundTrackingPointsFull, magnitudeVelocityFull)
@@ -132,6 +144,7 @@ if(innerData ~= 0 && outerData ~= 0 && fullData ~= 0)
     [thetaInner, signChangeCountInner, trajectoryEndPointsInner, totalAmountOfTrajectoriesInner] = CalculateParticleAngle(sortedFFTPInner, maskFull, framesMovement, useMaskLine);
     
     angleCombined = angleCombined
+    framesMovement
     percentageOfTrajectoriesAngleOuter = sum(thetaOuter>=angleCombined)/totalAmountOfTrajectoriesOuter*100
     percentageOfTrajectoriesAngleInner = sum(thetaInner>=angleCombined)/size(trajectoryEndPointsInner,1)*100
     percentageOfTrajectoriesAngleCombined = (sum(thetaOuter>=angleCombined) + sum(thetaInner>=angleCombined))/(totalAmountOfTrajectoriesInner + totalAmountOfTrajectoriesOuter)*100
@@ -148,6 +161,17 @@ if(innerData ~= 0 && outerData ~= 0 && fullData ~= 0)
     averageTPInner = averageTrackPosition(sortedFFTPInner);
     averageTVInner = averageTrackVelocity(sortedFFTPInner);
 
+    figure
+    contourf(magnitudeVelocityFieldCombined)    
+    set(gca, 'YDir', 'reverse');
+    set(gca, 'FontSize', fontSize);
+    titleText = 'Magnitude of Velocity Field';
+    title(titleText,'FontSize',fontSize)
+    c = colorbar('southoutside','FontSize',fontSize);
+    c.Label.String = 'Velocity in Pixels per Frame';
+    xlabel('Pixels','FontSize',fontSize) % x-axis label
+    ylabel('Pixels','FontSize',fontSize) % y-axis label
+    
     figure
     contourf(magnitudeVelocityFieldCombined)
     colormap(winter)
@@ -168,7 +192,7 @@ if(innerData ~= 0 && outerData ~= 0 && fullData ~= 0)
     averageTVOuter = averageTrackVelocity(firstFoundTrackingPointsOuter);
     averageTPInner = averageTrackPosition(firstFoundTrackingPointsInner);
     averageTVInner = averageTrackVelocity(firstFoundTrackingPointsInner);
-
+    
     figure
     contourf(magnitudeVelocityFieldCombined)
     colormap(winter)
